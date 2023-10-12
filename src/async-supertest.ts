@@ -1,4 +1,4 @@
-import { API, CallExpression, FileInfo, FunctionExpression, Identifier, MemberExpression } from 'jscodeshift';
+import { API, ArrowFunctionExpression, CallExpression, FileInfo, FunctionExpression, Identifier, MemberExpression } from 'jscodeshift';
 import { AsyncItTransformerOptions, asyncItAstTransformer } from './async-it';
 
 // DOC: to check AST node types use https://astexplorer.net/
@@ -13,6 +13,7 @@ export default function asyncSupertestTransformer(file: FileInfo, api: API) {
   const options: AsyncItTransformerOptions = {
     describeFuncName: 'describe',
     itFuncName: 'it',
+    skipFuncName: 'skip',
     doneFuncName: 'done',
     rmDoneFunc: true,
     rmDoneFuncMode: 'rm'
@@ -39,11 +40,17 @@ export default function asyncSupertestTransformer(file: FileInfo, api: API) {
       }
     })
     // also run checks on the 'end' func args
-    .filter(call => call.node.arguments.length === 1 &&
-      call.node.arguments[0].type === 'FunctionExpression' &&
-      call.node.arguments[0].params.length === 2 &&
-      (call.node.arguments[0] as FunctionExpression).params.every(x => x.type === 'Identifier'))
     .forEach(call => {
+      // replacing funcs can trigger another loop iteration so we need to filter
+      // inside the loop for calls to the 'end' func
+      if (call.node.arguments.length !== 1 ||
+        (call.node.arguments[0].type !== 'FunctionExpression' &&
+          call.node.arguments[0].type !== 'ArrowFunctionExpression') ||
+        call.node.arguments[0].params.length !== 2 ||
+        (call.node.arguments[0] as FunctionExpression | ArrowFunctionExpression)
+          .params.some(x => x.type !== 'Identifier'))
+        return;
+
       const endFuncArg = call.node.arguments[0] as FunctionExpression;
 
       // find 'err' and 'res' args name by their position
@@ -82,5 +89,5 @@ export default function asyncSupertestTransformer(file: FileInfo, api: API) {
       j(call).replaceWith(assignAsyncResult);
     });
 
-  return root.toSource({ lineTerminator: '\n', quote: 'single' });
+  return itFuncCalls.size() > 0 ? root.toSource({ lineTerminator: '\n', quote: 'single' }) : null;
 }
