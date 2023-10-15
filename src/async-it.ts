@@ -53,7 +53,8 @@ export function asyncItAstTransformer(j: core.JSCodeshift, root: Collection<any>
         path.arguments.length === 2 &&
         path.arguments[0].type !== 'FunctionExpression' &&
         (path.arguments[1].type === 'FunctionExpression' ||
-          path.arguments[1].type === 'ArrowFunctionExpression');
+          path.arguments[1].type === 'ArrowFunctionExpression') &&
+        path.arguments[1].async === false;
       return isItCall;
     });
 

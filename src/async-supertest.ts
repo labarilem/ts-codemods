@@ -37,7 +37,7 @@ export default function asyncSupertestTransformer(file: FileInfo, api: API) {
         object: {
           type: 'CallExpression'
         }
-      }
+      },
     })
     // also run checks on the 'end' func args
     .forEach(call => {
@@ -46,6 +46,7 @@ export default function asyncSupertestTransformer(file: FileInfo, api: API) {
       if (call.node.arguments.length !== 1 ||
         (call.node.arguments[0].type !== 'FunctionExpression' &&
           call.node.arguments[0].type !== 'ArrowFunctionExpression') ||
+        call.node.arguments[0].async ||
         call.node.arguments[0].params.length !== 2 ||
         (call.node.arguments[0] as FunctionExpression | ArrowFunctionExpression)
           .params.some(x => x.type !== 'Identifier'))
