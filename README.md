@@ -7,6 +7,8 @@ Also remember that not every code migration can be easily 100% automated.
 
 ## Development
 
+To learn more about building codemods, check out [these](https://marcolabarile.me/my%20projects/2023/10/13/automating-callbacks-to-async-migration-in-mocha-tests-1/) [articles](https://marcolabarile.me/my%20projects/2023/10/19/automating-callbacks-to-async-migration-in-mocha-tests-2/) on my blog.
+
 Install dependencies:
 
 ```
