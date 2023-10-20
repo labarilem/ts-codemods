@@ -43,13 +43,13 @@ export default function asyncSupertestTransformer(file: FileInfo, api: API) {
     .forEach(call => {
       // replacing funcs can trigger another loop iteration so we need to filter
       // inside the loop for calls to the 'end' func
-      if (call.node.arguments.length !== 1 ||
-        (call.node.arguments[0].type !== 'FunctionExpression' &&
+      if (call?.node?.arguments?.length !== 1 ||
+        (call.node.arguments[0]?.type !== 'FunctionExpression' &&
           call.node.arguments[0].type !== 'ArrowFunctionExpression') ||
         call.node.arguments[0].async ||
-        call.node.arguments[0].params.length !== 2 ||
+        call.node.arguments[0].params?.length !== 2 ||
         (call.node.arguments[0] as FunctionExpression | ArrowFunctionExpression)
-          .params.some(x => x.type !== 'Identifier'))
+          .params.some(x => x?.type !== 'Identifier'))
         return;
 
       const endFuncArg = call.node.arguments[0] as FunctionExpression;
